@@ -13,7 +13,7 @@ const PropertyCard = ({
   const { t } = useTranslation()
   const navigate = useNavigate()
 
-  const actionGridClass = showOfferButton ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'
+  const actionGridClass = showOfferButton ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 gap-3'
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-white/10 dark:bg-neutral-900 dark:shadow-none">
@@ -88,15 +88,6 @@ const PropertyCard = ({
               {t('properties.view_details', 'View Details')}
             </button>
 
-            {showOfferButton ? (
-              <button
-                type="button"
-                onClick={() => onOpenOffer(property)}
-                className="w-full rounded-xl bg-brand-dark px-4 py-3 text-xs font-semibold uppercase tracking-[0.28em] text-white transition hover:bg-brand-gold dark:bg-brand-gold dark:text-brand-dark dark:hover:bg-white"
-              >
-                {hasOffer ? t('buyer.update_offer', 'Update Offer') : t('buyer.make_offer', 'Make Offer')}
-              </button>
-            ) : null}
           </div>
         </div>
       </div>

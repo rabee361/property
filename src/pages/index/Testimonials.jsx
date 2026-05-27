@@ -64,7 +64,7 @@ const Testimonials = () => {
   const duplicated = [...testimonials, ...testimonials];
 
   return (
-    <section id="testimonials" className="py-20 bg-gray-50 overflow-hidden">
+    <section id="testimonials" className="overflow-hidden bg-gray-50 py-20 transition-colors duration-300 dark:bg-neutral-950">
       <div className="container mx-auto px-6 lg:px-12">
         {/* Section Header */}
         <motion.div 
@@ -72,9 +72,9 @@ const Testimonials = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="mb-16 text-center"
         >
-          <h2 className="text-3xl md:text-4xl font-light text-brand-dark uppercase tracking-widest mb-4">
+          <h2 className="mb-4 text-3xl font-light uppercase tracking-widest text-brand-dark dark:text-white md:text-4xl">
             {t('testimonials.section_title')}
           </h2>
           <div className="w-24 h-1 bg-brand-gold mx-auto"></div>
@@ -102,7 +102,7 @@ const Testimonials = () => {
             return (
               <div
                 key={`${item.id}-${index}`}
-                className="min-w-[300px] max-w-[300px] bg-white rounded-xl p-6 shadow-md border border-gray-100 flex flex-col gap-4 shrink-0"
+                className="flex min-w-75 max-w-75 shrink-0 flex-col gap-4 rounded-xl border border-gray-100 bg-white p-6 shadow-md dark:border-white/10 dark:bg-neutral-900 dark:shadow-none"
               >
                 {/* Avatar + Name + Stars */}
                 <div className="flex items-center gap-4">
@@ -112,7 +112,7 @@ const Testimonials = () => {
                     className="w-14 h-14 rounded-full object-cover border-2 border-brand-gold/30"
                   />
                   <div>
-                    <h4 className="font-semibold text-brand-dark text-sm">
+                    <h4 className="text-sm font-semibold text-brand-dark dark:text-white">
                       {displayName}
                     </h4>
                     <div className="flex gap-0.5 mt-1">
@@ -129,7 +129,7 @@ const Testimonials = () => {
                 </div>
 
                 {/* Opinion Text */}
-                <p className="text-gray-600 text-sm leading-relaxed font-light">
+                <p className="text-sm font-light leading-relaxed text-gray-600 dark:text-gray-300">
                   {displayText}
                 </p>
               </div>

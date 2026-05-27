@@ -35,6 +35,7 @@ class UpdatePropertyRequest extends FormRequest
             'type'            => ['nullable',  Rule::in(['apartment','villa','land','office','shop','architecture']) ],
             'address'         => ['nullable','string','max:255'],
             'number_of_rooms' => ['nullable','integer','min:0'],
+            'bathrooms'       => ['nullable','integer','min:0'],
             'features'        => ['nullable' , 'string' ],
             'area_m2'         => ['nullable','integer','min:0'],
 

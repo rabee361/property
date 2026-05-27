@@ -4,6 +4,7 @@
     "owner": "OWNER",
     "buyer": "BUYER",
     "home": "HOME",
+    "favorites": "FAVORITES",
     "properties": "PROPERTIES",
     "about": "ABOUT",
     "services": "SERVICES",

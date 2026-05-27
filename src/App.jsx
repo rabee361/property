@@ -1,7 +1,9 @@
 import { Navigate, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 import Index from './pages/index/Index'
 import Properties from './pages/Properties'
 import PropertyDetails from './pages/PropertyDetails'
+import Favorites from './pages/Favorites'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
 import ChangePassword from './pages/ChangePassword'
@@ -25,44 +27,49 @@ import PropertyEdit from './pages/owner/PropertyEdit'
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/properties" element={<Properties />} />
-      <Route path="/properties/:id" element={<PropertyDetails />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/admin/login" element={<Login mode="admin" />} />
+    <>
+      <Toaster position="top-right" />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/properties" element={<Properties />} />
+        <Route path="/properties/:id" element={<PropertyDetails />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<Login mode="admin" />} />
 
-      <Route element={<RequireAuth accountType="admin" />}>
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="users" element={<Navigate to="/admin/profiles" replace />} />
-          <Route path="profiles" element={<AdminProfiles />} />
-          <Route path="properties" element={<AdminProperties />} />
-          <Route path="change-password" element={<ChangePassword />} />
-        </Route>
-      </Route>
-
-      <Route element={<RequireAuth accountType="user" />}>
-        <Route path="/owner" element={<ProfileLayout />}>
-          <Route index element={<MyProperties />} />
-          <Route path="profile/create" element={<CreateProfile />} />
-          <Route path="info" element={<ProfileInfo />} />
-          <Route path="change-password" element={<ChangePassword />} />
-          <Route path="properties/new" element={<PropertyEdit />} />
-          <Route path="properties/:id/edit" element={<PropertyEdit />} />
+        <Route element={<RequireAuth accountType="admin" />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="users" element={<Navigate to="/admin/profiles" replace />} />
+            <Route path="profiles" element={<AdminProfiles />} />
+            <Route path="properties" element={<AdminProperties />} />
+            <Route path="change-password" element={<ChangePassword />} />
+          </Route>
         </Route>
 
-        {/* Buyer routes are disabled for now.
-        <Route path="/buyer" element={<BuyerLayout />}>
-          <Route index element={<BuyerHome />} />
-          <Route path="favorites" element={<BuyerFavorites />} />
-          <Route path="offers" element={<BuyerOffers />} />
-          <Route path="profile" element={<BuyerProfile />} />
+        <Route element={<RequireAuth accountType="user" />}>
+          <Route path="/favorites" element={<Favorites />} />
+
+          <Route path="/owner" element={<ProfileLayout />}>
+            <Route index element={<MyProperties />} />
+            <Route path="profile/create" element={<CreateProfile />} />
+            <Route path="info" element={<ProfileInfo />} />
+            <Route path="change-password" element={<ChangePassword />} />
+            <Route path="properties/new" element={<PropertyEdit />} />
+            <Route path="properties/:id/edit" element={<PropertyEdit />} />
+          </Route>
+
+          {/* Buyer routes are disabled for now.
+          <Route path="/buyer" element={<BuyerLayout />}>
+            <Route index element={<BuyerHome />} />
+            <Route path="favorites" element={<BuyerFavorites />} />
+            <Route path="offers" element={<BuyerOffers />} />
+            <Route path="profile" element={<BuyerProfile />} />
+          </Route>
+          */}
         </Route>
-        */}
-      </Route>
-    </Routes>
+      </Routes>
+    </>
   )
 }
 

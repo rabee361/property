@@ -21,6 +21,7 @@ class PublicPropertyController extends Controller
             'status',
             'address',
             'number_of_rooms',
+            'bathrooms',
             'area_m2',
             'features',
             'created_at',

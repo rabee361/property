@@ -181,6 +181,7 @@ public function mine(Request $request)
         'status'          => $isAdmin ? 'approved' : 'pending',   // الأدمن = approved فوراً
         'address'         => $request->address,
         'number_of_rooms' => $request->number_of_rooms,
+        'bathrooms'       => $request->bathrooms,
         'features'        => $request->features,
         'area_m2'         => $request->area_m2,
     ]);
@@ -280,6 +281,7 @@ public function update(UpdatePropertyRequest $request, Property $property)
         'property_type'   => $request->property_type ?? $request->type ?? $property->property_type,
         'address'         => $request->address ?? $property->address,
         'number_of_rooms' => $request->number_of_rooms ?? $property->number_of_rooms,
+        'bathrooms'       => $request->bathrooms ?? $property->bathrooms,
         'features'        => $request->features ?? $property->features,
         'area_m2'         => $request->area_m2 ?? $property->area_m2,
     ];

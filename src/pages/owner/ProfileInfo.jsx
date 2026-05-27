@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { FaCalendarAlt, FaCity, FaIdCard, FaUser } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
@@ -120,8 +121,11 @@ const ProfileInfo = () => {
         idCardImage: null,
       });
       setIsSaved(true);
+      toast.success(t('profile.saved_success', 'Changes saved successfully'));
     } catch (error) {
-      setErrorMessage(error.message || t('profile.update_profile_failed', 'Failed to update the profile.'));
+      const msg = error.message || t('profile.update_profile_failed', 'Failed to update the profile.');
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }

@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { FaBars, FaTimes, FaGlobe } from 'react-icons/fa';
+import { FaBars, FaTimes, FaGlobe, FaMoon, FaSun } from 'react-icons/fa';
 import brandIcon from '../../assets/icon.webp';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
-  const { isAuthenticated, isAdmin, logout } = useAuth();
+  const { isAuthenticated, isAdmin, isUser, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -25,19 +27,20 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { name: t('nav.owner'), href: '/owner' },
-    { name: t('nav.home'), href: '#home' },
-    { name: t('nav.properties'), href: '#properties' },
-    { name: t('nav.about'), href: '#about' },
-    { name: t('nav.services'), href: '#services' },
-    { name: t('nav.contact'), href: '#contact' },
+    { name: t('profile.my_properties', 'My Properties'), to: '/owner' },
+    ...(isUser ? [{ name: t('nav.favorites', 'Favorites'), to: '/favorites' }] : []),
+    { name: t('nav.home'), href: '/#home' },
+    { name: t('nav.properties'), href: '/#properties' },
+    { name: t('nav.about'), href: '/#about' },
+    { name: t('nav.services'), href: '/#services' },
+    { name: t('nav.contact'), href: '/#contact' },
   ];
 
   return (
     <nav
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-admin-sidebar shadow-md py-4' 
+          ? 'bg-admin-sidebar shadow-md py-4 dark:bg-neutral-950/95' 
           : 'bg-linear-to-b from-black/80 to-transparent py-5'
       }`}
     >
@@ -49,24 +52,36 @@ const Navbar = () => {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-6 xl:space-x-8">
-          {navLinks.map((link, idx) => (
-            <a
-              key={idx}
-              href={link.href}
-              className="text-white/90 text-[13px] uppercase tracking-widest font-medium hover:text-brand-gold transition-colors"
-            >
-              {link.name}
-            </a>
-          ))}
+          {navLinks.map((link, idx) =>
+            link.to ? (
+              <Link
+                key={idx}
+                to={link.to}
+                className="text-white/90 text-[13px] uppercase tracking-widest font-medium hover:text-brand-gold transition-colors"
+              >
+                {link.name}
+              </Link>
+            ) : (
+              <a
+                key={idx}
+                href={link.href}
+                className="text-white/90 text-[13px] uppercase tracking-widest font-medium hover:text-brand-gold transition-colors"
+              >
+                {link.name}
+              </a>
+            ),
+          )}
 
           {isAuthenticated ? (
             <>
-              <Link
-                to={isAdmin ? '/admin' : '/owner'}
-                className="text-white/90 text-[13px] uppercase tracking-widest font-medium hover:text-brand-gold transition-colors"
-              >
-                {isAdmin ? t('auth.admin_login_link', 'Admin Login') : t('nav.owner')}
-              </Link>
+              {isAdmin ? (
+                <Link
+                  to="/admin"
+                  className="text-white/90 text-[13px] uppercase tracking-widest font-medium hover:text-brand-gold transition-colors"
+                >
+                  {t('auth.admin_login_link', 'Admin Login')}
+                </Link>
+              ) : null}
               <button
                 type="button"
                 onClick={logout}
@@ -94,6 +109,15 @@ const Navbar = () => {
           )}
 
           <button
+            type="button"
+            onClick={toggleTheme}
+            className="text-white hover:text-brand-gold transition-colors p-2"
+            aria-label={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          >
+            {theme === 'dark' ? <FaSun className="w-5 h-5" /> : <FaMoon className="w-5 h-5" />}
+          </button>
+
+          <button
             onClick={toggleLanguage}
             className="text-white hover:text-brand-gold transition-colors p-2"
           >
@@ -118,25 +142,38 @@ const Navbar = () => {
           isMobileMenuOpen ? 'opacity-100 visible shadow-xl' : 'opacity-0 invisible'
         }`}
       >
-        {navLinks.map((link, idx) => (
-          <a
-            key={idx}
-            href={link.href}
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="text-white text-sm uppercase tracking-widest hover:text-brand-gold transition-colors"
-          >
-            {link.name}
-          </a>
-        ))}
-        {isAuthenticated ? (
-          <>
+        {navLinks.map((link, idx) =>
+          link.to ? (
             <Link
-              to={isAdmin ? '/admin' : '/owner'}
+              key={idx}
+              to={link.to}
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-white text-sm uppercase tracking-widest hover:text-brand-gold transition-colors"
             >
-              {isAdmin ? t('auth.admin_login_link', 'Admin Login') : t('nav.owner')}
+              {link.name}
             </Link>
+          ) : (
+            <a
+              key={idx}
+              href={link.href}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-white text-sm uppercase tracking-widest hover:text-brand-gold transition-colors"
+            >
+              {link.name}
+            </a>
+          ),
+        )}
+        {isAuthenticated ? (
+          <>
+            {isAdmin ? (
+              <Link
+                to="/admin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-white text-sm uppercase tracking-widest hover:text-brand-gold transition-colors"
+              >
+                {t('auth.admin_login_link', 'Admin Login')}
+              </Link>
+            ) : null}
             <button
               type="button"
               onClick={() => {
@@ -167,11 +204,24 @@ const Navbar = () => {
           </>
         )}
         <button
+          type="button"
+          onClick={() => {
+            toggleTheme();
+            setIsMobileMenuOpen(false);
+          }}
+          className="text-brand-gold flex items-center space-x-2 pt-2 rtl:space-x-reverse"
+        >
+          {theme === 'dark' ? <FaSun className="w-5 h-5" /> : <FaMoon className="w-5 h-5" />}
+          <span className="uppercase text-sm tracking-widest">
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          </span>
+        </button>
+        <button
           onClick={() => {
             toggleLanguage();
             setIsMobileMenuOpen(false);
           }}
-          className="text-brand-gold flex items-center space-x-2 pt-2"
+          className="text-brand-gold flex items-center space-x-2 pt-2 rtl:space-x-reverse"
         >
           <FaGlobe className="w-5 h-5" />
           <span className="uppercase text-sm tracking-widest">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-hot-toast';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
@@ -68,8 +69,11 @@ const Profiles = () => {
             : profile,
         ),
       );
+      toast.success(t('admin.profile_status_updated', 'Profile status updated successfully!'));
     } catch (error) {
-      setErrorMessage(error.message || t('admin.profile_action_failed', 'Failed to update profile status.'));
+      const msg = error.message || t('admin.profile_action_failed', 'Failed to update profile status.');
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setActiveActionId(null);
     }

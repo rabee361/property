@@ -59,7 +59,7 @@ export function normalizeProperty(property) {
     priceValue: Number(property.price) || 0,
     area: Number(property.area_m2) || 0,
     beds: Number(property.number_of_rooms) || 0,
-    baths: Number(property.bathrooms) || 0,
+    baths: Number(property.bathrooms ?? property.baths) || 0,
     type: purpose || propertyType,
     purpose,
     propertyType,

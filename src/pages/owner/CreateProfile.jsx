@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import { FaCalendarAlt, FaCity, FaIdCard, FaUser } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext'
 
@@ -69,9 +70,12 @@ const CreateProfile = () => {
         city: formData.city,
       })
 
+      toast.success(t('profile.created_success', 'Profile created successfully!'))
       navigate(returnTo, { replace: true })
     } catch (error) {
-      setErrorMessage(error.message || t('profile.create_profile_failed', 'Failed to create the profile.'))
+      const msg = error.message || t('profile.create_profile_failed', 'Failed to create the profile.')
+      setErrorMessage(msg)
+      toast.error(msg)
     } finally {
       setIsSubmitting(false)
     }

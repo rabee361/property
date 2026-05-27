@@ -33,7 +33,7 @@ const Services = () => {
   ];
 
   return (
-    <section id="services" className="py-20 bg-white">
+    <section id="services" className="bg-white py-20 transition-colors duration-300 dark:bg-neutral-900">
       <div className="container mx-auto px-6 lg:px-12">
         {/* Section Header */}
         <motion.div 
@@ -41,12 +41,12 @@ const Services = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="mb-16 text-center"
         >
-          <h2 className="text-3xl md:text-4xl font-light text-brand-dark uppercase tracking-widest mb-4">
+          <h2 className="mb-4 text-3xl font-light uppercase tracking-widest text-brand-dark dark:text-white md:text-4xl">
             {t('services.section_title')}
           </h2>
-          <p className="text-gray-500 text-lg font-light mb-4">
+          <p className="mb-4 text-lg font-light text-gray-500 dark:text-gray-400">
             {t('services.section_subtitle')}
           </p>
           <div className="w-24 h-1 bg-brand-gold mx-auto"></div>
@@ -63,12 +63,12 @@ const Services = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="flex items-start gap-5"
             >
-              <div className="w-16 h-16 rounded-xl bg-brand-gold/10 flex items-center justify-center shrink-0">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-brand-gold/10 dark:bg-brand-gold/15">
                 <item.icon className="w-7 h-7 text-brand-gold" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-brand-dark mb-2">{item.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed font-light">{item.description}</p>
+                <h3 className="mb-2 text-lg font-semibold text-brand-dark dark:text-white">{item.title}</h3>
+                <p className="text-sm font-light leading-relaxed text-gray-500 dark:text-gray-400">{item.description}</p>
               </div>
             </motion.div>
           ))}

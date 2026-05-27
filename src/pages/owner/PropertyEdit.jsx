@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { useOwnerProperties } from '../../context/OwnerPropertiesContext';
@@ -14,6 +15,7 @@ const createEmptyForm = () => ({
   purpose: 'sale',
   propertyType: 'apartment',
   numberOfRooms: 1,
+  bathrooms: 1,
   areaM2: '',
   features: '',
   status: OWNER_PROPERTY_STATUS,
@@ -31,6 +33,7 @@ const buildEditableProperty = (property) => ({
   purpose: property.purpose || 'sale',
   propertyType: property.propertyType || 'apartment',
   numberOfRooms: property.beds || 0,
+  bathrooms: property.baths ?? 0,
   areaM2: property.area || '',
   features: property.features || '',
   status: property.status || OWNER_PROPERTY_STATUS,
@@ -167,13 +170,17 @@ const PropertyEdit = () => {
 
       if (isCreateMode) {
         await createProperty(payload);
+        toast.success(t('profile.property_created', 'Property created successfully!'));
       } else {
         await updateProperty(property.id, payload);
+        toast.success(t('profile.property_updated', 'Property updated successfully!'));
       }
 
       navigate('/owner', { replace: true });
     } catch (error) {
-      setErrorMessage(error.message || t('profile.save_failed', 'Failed to save the property.'));
+      const msg = error.message || t('profile.save_failed', 'Failed to save the property.');
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -455,6 +462,21 @@ const PropertyEdit = () => {
                 min="0"
                 name="numberOfRooms"
                 value={formData.numberOfRooms}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-200 dark:border-white/10 rounded-lg text-gray-700 dark:text-gray-100 text-sm focus:outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/10 transition-colors bg-gray-50/50 dark:bg-white/5"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest font-medium mb-2 block">
+                {t('profile.bathrooms', 'Bathrooms')}
+              </label>
+              <input
+                type="number"
+                min="0"
+                name="bathrooms"
+                value={formData.bathrooms}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-gray-200 dark:border-white/10 rounded-lg text-gray-700 dark:text-gray-100 text-sm focus:outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/10 transition-colors bg-gray-50/50 dark:bg-white/5"

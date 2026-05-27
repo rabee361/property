@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-hot-toast';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
@@ -69,8 +70,11 @@ const Properties = () => {
             : property,
         ),
       );
+      toast.success(t('admin.property_status_updated', 'Property status updated successfully!'));
     } catch (error) {
-      setErrorMessage(error.message || t('admin.property_action_failed', 'Failed to update property status.'));
+      const msg = error.message || t('admin.property_action_failed', 'Failed to update property status.');
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setActivePropertyId(null);
     }

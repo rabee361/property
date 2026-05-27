@@ -6,7 +6,7 @@ const About = () => {
   const { t } = useTranslation();
 
   return (
-    <section id="about" className="py-24 bg-white overflow-hidden">
+    <section id="about" className="overflow-hidden bg-white py-24 transition-colors duration-300 dark:bg-neutral-900">
       <div className="container mx-auto px-6 lg:px-12">
         <div className="flex flex-col lg:flex-row items-center gap-16">
           
@@ -18,7 +18,7 @@ const About = () => {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="w-full lg:w-1/2 relative"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-square md:aspect-[4/3] lg:aspect-square">
+            <div className="relative aspect-square overflow-hidden rounded-2xl shadow-2xl md:aspect-4/3 lg:aspect-square">
               <img 
                 src={heroImg} 
                 alt={t('about.section_title')} 
@@ -42,11 +42,11 @@ const About = () => {
             <h2 className="text-sm font-semibold text-brand-gold uppercase tracking-widest mb-3">
               {t('about.section_title')}
             </h2>
-            <h3 className="text-3xl md:text-5xl font-light text-brand-dark leading-tight mb-8">
+            <h3 className="mb-8 text-3xl font-light leading-tight text-brand-dark dark:text-white md:text-5xl">
               {t('nav.brand')}
             </h3>
             
-            <div className="space-y-6 text-gray-600 text-lg leading-relaxed font-light">
+            <div className="space-y-6 text-lg font-light leading-relaxed text-gray-600 dark:text-gray-300">
               <p>
                 {t('about.text_1')}
               </p>
@@ -57,13 +57,13 @@ const About = () => {
             
             <div className="mt-10 flex items-center gap-8">
               <div className="flex flex-col">
-                <span className="text-4xl font-light text-brand-dark mb-1">10+</span>
-                <span className="text-xs uppercase tracking-widest text-gray-500">Years Exp</span>
+                <span className="mb-1 text-4xl font-light text-brand-dark dark:text-white">10+</span>
+                <span className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">Years Exp</span>
               </div>
-              <div className="w-px h-12 bg-gray-200"></div>
+              <div className="h-12 w-px bg-gray-200 dark:bg-white/10"></div>
               <div className="flex flex-col">
-                <span className="text-4xl font-light text-brand-dark mb-1">250+</span>
-                <span className="text-xs uppercase tracking-widest text-gray-500">Properties</span>
+                <span className="mb-1 text-4xl font-light text-brand-dark dark:text-white">250+</span>
+                <span className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">Properties</span>
               </div>
             </div>
           </motion.div>

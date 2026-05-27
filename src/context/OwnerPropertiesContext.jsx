@@ -23,6 +23,7 @@ function buildPropertyFormData(propertyData, { isCreateMode }) {
   appendIfPresent(formData, 'property_type', propertyData.propertyType)
   appendIfPresent(formData, 'address', propertyData.address)
   appendIfPresent(formData, 'number_of_rooms', propertyData.numberOfRooms)
+  appendIfPresent(formData, 'bathrooms', propertyData.bathrooms)
   appendIfPresent(formData, 'area_m2', propertyData.areaM2)
   appendIfPresent(formData, 'features', propertyData.features)
 

@@ -35,6 +35,7 @@ class AddPropertyRequest extends FormRequest
             'status'          => ['required' , Rule::in(['pending','approved','rejected','sold', 'rented' ]) ],
             'address'         => ['required','string','max:255'],
             'number_of_rooms' => ['required','integer','min:0'],
+            'bathrooms'       => ['required','integer','min:0'],
             'features'        => ['nullable' , 'string' ],
             'area_m2'         => ['nullable','integer','min:0'],
 
