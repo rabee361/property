@@ -8,10 +8,6 @@ function resolvePropertyImage(path) {
 function collectPropertyImages(property) {
   const imageSet = new Set()
 
-  if (property?.deed_photo) {
-    imageSet.add(resolvePropertyImage(property.deed_photo))
-  }
-
   for (const image of property?.images || []) {
     if (image?.image_path) {
       imageSet.add(resolvePropertyImage(image.image_path))

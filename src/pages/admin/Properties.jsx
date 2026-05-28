@@ -13,6 +13,7 @@ const Properties = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [activePropertyId, setActivePropertyId] = useState(null);
+  const [approvalModalProperty, setApprovalModalProperty] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -173,7 +174,7 @@ const Properties = () => {
                       {property.status === 'pending' ? (
                         <>
                           <button
-                            onClick={() => handleStatusChange(property.id, 'approved')}
+                            onClick={() => setApprovalModalProperty(property)}
                             disabled={activePropertyId === property.id}
                             className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
                           >
@@ -202,6 +203,71 @@ const Properties = () => {
           </table>
         </div>
       </div>
+
+      {/* Approval Modal */}
+      {approvalModalProperty && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setApprovalModalProperty(null)}></div>
+          <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-neutral-900 border border-gray-100 dark:border-white/10 animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <h3 className="text-xl font-bold uppercase tracking-widest text-gray-900 dark:text-white mb-4">
+                {t('admin.approve_property', 'Approve Property')}
+              </h3>
+              
+              <div className="mb-6 rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-white/5">
+                {approvalModalProperty.deed_photo ? (
+                  <img 
+                    src={approvalModalProperty.deed_photo} 
+                    alt="Deed Photo" 
+                    className="w-full h-64 object-cover"
+                  />
+                ) : (
+                  <div className="flex h-64 items-center justify-center text-sm text-gray-500 uppercase tracking-widest">
+                    {t('admin.no_deed_photo', 'No Deed Photo Available')}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 mb-8">
+                <div className="flex justify-between border-b border-gray-100 dark:border-white/5 pb-2">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">{t('admin.title', 'Title')}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{approvalModalProperty.title}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-100 dark:border-white/5 pb-2">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">{t('admin.type', 'Type')}</span>
+                  <span className="text-sm font-medium uppercase text-gray-900 dark:text-white">{approvalModalProperty.property_type}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-100 dark:border-white/5 pb-2">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">{t('admin.owner', 'Owner')}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    {approvalModalProperty.user?.name || approvalModalProperty.admin?.email || t('admin.admin_uploaded', 'Admin')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setApprovalModalProperty(null)}
+                  className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-800 dark:text-gray-300 dark:hover:bg-neutral-700 cursor-pointer"
+                >
+                  {t('admin.cancel', 'Cancel')}
+                </button>
+                <button
+                  onClick={() => {
+                    handleStatusChange(approvalModalProperty.id, 'approved');
+                    setApprovalModalProperty(null);
+                  }}
+                  disabled={activePropertyId === approvalModalProperty.id}
+                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600 hover:shadow-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                >
+                  <FaCheck className="h-4 w-4" />
+                  {t('admin.confirm_approve', 'Confirm Approve')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

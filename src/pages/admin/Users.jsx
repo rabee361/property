@@ -12,6 +12,7 @@ const Profiles = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeActionId, setActiveActionId] = useState(null);
+  const [approvalModalProfile, setApprovalModalProfile] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -161,9 +162,9 @@ const Profiles = () => {
                       ) : (
                         <>
                           <button
-                            onClick={() => handleProfileAction(profile.id, 'approve')}
+                            onClick={() => setApprovalModalProfile(profile)}
                             disabled={activeActionId === profile.id}
-                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                           >
                             <FaCheck className="h-3 w-3" />
                             {t('admin.approve', 'Approve')}
@@ -186,6 +187,71 @@ const Profiles = () => {
           </table>
         </div>
       </div>
+
+      {/* Approval Modal */}
+      {approvalModalProfile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setApprovalModalProfile(null)}></div>
+          <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-neutral-900 border border-gray-100 dark:border-white/10 animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <h3 className="text-xl font-bold uppercase tracking-widest text-gray-900 dark:text-white mb-4">
+                {t('admin.approve_profile', 'Approve Profile')}
+              </h3>
+              
+              <div className="mb-6 rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-white/5">
+                {approvalModalProfile.id_card_photo ? (
+                  <img 
+                    src={approvalModalProfile.id_card_photo} 
+                    alt="ID Card Photo" 
+                    className="w-full h-64 object-cover"
+                  />
+                ) : (
+                  <div className="flex h-64 items-center justify-center text-sm text-gray-500 uppercase tracking-widest">
+                    {t('admin.no_id_photo', 'No ID Photo Available')}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 mb-8">
+                <div className="flex justify-between border-b border-gray-100 dark:border-white/5 pb-2">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">{t('admin.full_name', 'Full Name')}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{approvalModalProfile.full_name}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-100 dark:border-white/5 pb-2">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">{t('admin.national_number', 'National Number')}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{approvalModalProfile.national_number}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-100 dark:border-white/5 pb-2">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">{t('admin.contact', 'Contact')}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    {approvalModalProfile.user?.email || approvalModalProfile.user?.phone || t('admin.not_available', 'N/A')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setApprovalModalProfile(null)}
+                  className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-800 dark:text-gray-300 dark:hover:bg-neutral-700 cursor-pointer"
+                >
+                  {t('admin.cancel', 'Cancel')}
+                </button>
+                <button
+                  onClick={() => {
+                    handleProfileAction(approvalModalProfile.id, 'approve');
+                    setApprovalModalProfile(null);
+                  }}
+                  disabled={activeActionId === approvalModalProfile.id}
+                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600 hover:shadow-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                >
+                  <FaCheck className="h-4 w-4" />
+                  {t('admin.confirm_approve', 'Confirm Approve')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
