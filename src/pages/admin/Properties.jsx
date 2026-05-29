@@ -216,11 +216,18 @@ const Properties = () => {
               
               <div className="mb-6 rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-white/5">
                 {approvalModalProperty.deed_photo ? (
-                  <img 
-                    src={approvalModalProperty.deed_photo} 
-                    alt="Deed Photo" 
-                    className="w-full h-64 object-cover"
-                  />
+                  <a 
+                    href={approvalModalProperty.deed_photo} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block w-full h-64"
+                  >
+                    <img 
+                      src={approvalModalProperty.deed_photo} 
+                      alt="Deed Photo" 
+                      className="w-full h-full object-cover cursor-pointer transition hover:opacity-80"
+                    />
+                  </a>
                 ) : (
                   <div className="flex h-64 items-center justify-center text-sm text-gray-500 uppercase tracking-widest">
                     {t('admin.no_deed_photo', 'No Deed Photo Available')}

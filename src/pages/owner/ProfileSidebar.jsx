@@ -9,7 +9,8 @@ import {
   FaBuilding, 
   FaUserEdit,
   FaHome,
-  FaLock
+  FaLock,
+  FaBell
 } from 'react-icons/fa';
 import brandIcon from '../../assets/icon.webp';
 import { useTheme } from '../../context/ThemeContext';
@@ -25,6 +26,7 @@ const ProfileSidebar = ({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) 
 
   const navItems = [
     { name: t('profile.my_properties', 'My Properties'), path: '/owner', icon: FaBuilding },
+    { name: t('profile.notifications', 'Notifications'), path: '/owner/notifications', icon: FaBell },
     { name: t('profile.profile_info', 'Profile Info'), path: '/owner/info', icon: FaUserEdit },
     { name: t('profile.change_password', 'Change Password'), path: '/owner/change-password', icon: FaLock },
   ];

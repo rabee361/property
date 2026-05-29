@@ -19,6 +19,7 @@ import CreateProfile from './pages/owner/CreateProfile'
 import MyProperties from './pages/owner/MyProperties'
 import ProfileInfo from './pages/owner/ProfileInfo'
 import PropertyEdit from './pages/owner/PropertyEdit'
+import Notifications from './pages/owner/Notifications'
 // import BuyerLayout from './pages/buyer/BuyerLayout'
 // import BuyerHome from './pages/buyer/BuyerHome'
 // import BuyerFavorites from './pages/buyer/BuyerFavorites'
@@ -52,6 +53,7 @@ function App() {
 
           <Route path="/owner" element={<ProfileLayout />}>
             <Route index element={<MyProperties />} />
+            <Route path="notifications" element={<Notifications />} />
             <Route path="profile/create" element={<CreateProfile />} />
             <Route path="info" element={<ProfileInfo />} />
             <Route path="change-password" element={<ChangePassword />} />
