@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -94,6 +95,12 @@ public function pending()
     ]);
     if ($profile->user) {
         $profile->user->notify(new \App\Notifications\ProfileApproveNotification());
+        
+        UserNotification::create([
+            'user_id' => $profile->user_id,
+            'title'   => 'Profile Approved',
+            'content' => 'Your profile has been verified successfully. You can now use all the platform features.'
+        ]);
     }
     $updatedProfile = $profile->fresh();
         return response()->json([

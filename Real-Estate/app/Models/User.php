@@ -41,6 +41,11 @@ class User extends Authenticatable
     return $this->hasMany(Property::class);
     }
 
+    public function notifications()
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
 
     public function favoriteProperties()
     {

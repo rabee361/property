@@ -36,9 +36,4 @@ class Admin extends Authenticatable
     return $this->hasMany(Property::class);
         }
 
-         public function sentNotifications()
-    {
-        return $this->hasMany(Notification::class, 'sent_by_admin_id');
-    }
-
 }

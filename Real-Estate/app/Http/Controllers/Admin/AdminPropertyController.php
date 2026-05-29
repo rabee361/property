@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AddPropertyRequest;
 use App\Http\Requests\Admin\UpdatePropertyRequest;
 use App\Models\Property;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -51,6 +52,12 @@ public function changeStatus(Request $request, $id)
     if ($property->user) {
         if ($newStatus === 'approved') {
             $property->user->notify(new \App\Notifications\PropertyApproveNotification());
+            
+            UserNotification::create([
+                'user_id' => $property->user_id,
+                'title'   => 'Property Approved',
+                'content' => "Your property listing '{$property->title}' has been approved and is now live on the platform."
+            ]);
         }
         elseif ($newStatus === 'rejected') {
             $property->user->notify(new \App\Notifications\PropertyRejectedNotification());

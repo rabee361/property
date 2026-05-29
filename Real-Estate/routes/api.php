@@ -3,6 +3,7 @@
 use App\Http\Controllers\App\PublicPropertyController;
 use App\Http\Controllers\User\FavoriteController;
 use App\Http\Controllers\User\LoginController;
+use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\RegisterController;
 use App\Http\Controllers\User\UserController;
@@ -68,3 +69,9 @@ Route::prefix('app')
         Route::get('/properties','myFavorites') ->middleware('auth:api');
 
          });
+
+       Route::prefix('/notifications')
+       ->controller(NotificationController::class)
+       ->group(function () {
+           Route::get('/mine', 'index')->middleware('auth:api');
+       });
