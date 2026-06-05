@@ -59,6 +59,7 @@ public function me()
             'date_of_birth' => $request->date_of_birth,
             'city' => $request->city,
             'is_verified' => false,
+            'status' => 'pending',
 
         ]);
 
@@ -107,19 +108,27 @@ public function show(Profile $profile)
         $id_card_photo = $request->file('id_card_photo')->store('id_card_photo', 'public');
     }
 
-        $profile->update([
-        'full_name'           => $request->full_name ?? $profile->full_name,
-        'national_number'     => $request->national_number ?? $profile->national_number,
-        'id_card_photo'       => $id_card_photo,
-        'date_of_birth'       => $request->date_of_birth ?? $profile->date_of_birth,
-        'city'                => $request->city ?? $profile->city,
-    ]);
+        $profileData = [
+            'full_name'       => $request->full_name ?? $profile->full_name,
+            'national_number' => $request->national_number ?? $profile->national_number,
+            'id_card_photo'   => $id_card_photo,
+            'date_of_birth'   => $request->date_of_birth ?? $profile->date_of_birth,
+            'city'            => $request->city ?? $profile->city,
+        ];
+
+        if (!$isAdmin) {
+            $profileData['is_verified'] = false;
+            $profileData['status'] = 'pending';
+        }
+
+        $profile->update($profileData);
         // إذا الأدمن يريد توثيق الحساب (حقل is_verified)
         if ($isAdmin && $request->has('is_verified')) {
-        $profile->update([
-            'is_verified' => $request->boolean('is_verified')   // هذا الأفضل للـ boolean
-        ]);
-    }
+            $profile->update([
+                'is_verified' => $request->boolean('is_verified'),
+                'status' => $request->boolean('is_verified') ? 'approved' : 'pending'
+            ]);
+        }
 
         return response()->json([
             'message' => 'The file has been updated successfully',

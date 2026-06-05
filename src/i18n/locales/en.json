@@ -183,6 +183,8 @@
     "properties_load_failed": "Failed to load properties.",
     "profile_action_failed": "Failed to update profile status.",
     "property_action_failed": "Failed to update property status.",
+    "search_profiles_placeholder": "Search profiles by full name",
+    "search_properties_placeholder": "Search properties by title",
     "status_pending": "Pending",
     "status_approved": "Approved",
     "status_rejected": "Rejected",

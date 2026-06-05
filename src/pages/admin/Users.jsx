@@ -13,6 +13,18 @@ const Profiles = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [activeActionId, setActiveActionId] = useState(null);
   const [approvalModalProfile, setApprovalModalProfile] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm.trim());
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [searchTerm]);
 
   useEffect(() => {
     let isMounted = true;
@@ -22,9 +34,18 @@ const Profiles = () => {
       setErrorMessage('');
 
       try {
-        const response = await apiRequest('/api/admin/profiles/index', {
+        const params = new URLSearchParams();
+
+        if (debouncedSearchTerm) {
+          params.set('full_name', debouncedSearchTerm);
+        }
+
+        const response = await apiRequest(
+          `/api/admin/profiles/index${params.toString() ? `?${params.toString()}` : ''}`,
+          {
           token,
-        });
+          },
+        );
 
         if (isMounted) {
           setProfiles(response?.data?.data || []);
@@ -47,7 +68,7 @@ const Profiles = () => {
     return () => {
       isMounted = false;
     };
-  }, [t, token]);
+  }, [debouncedSearchTerm, t, token]);
 
   const handleProfileAction = async (profileId, action) => {
     setActiveActionId(profileId);
@@ -65,6 +86,7 @@ const Profiles = () => {
             ? {
                 ...profile,
                 ...(response?.profile || {}),
+                status: action === 'approve' ? 'approved' : 'rejected',
                 is_verified: action === 'approve',
               }
             : profile,
@@ -80,6 +102,12 @@ const Profiles = () => {
     }
   };
 
+  const getProfileStatusBadgeClass = (status) => {
+    if (status === 'approved') return 'bg-emerald-500/90';
+    if (status === 'rejected') return 'bg-red-500/90';
+    return 'bg-amber-500/90';
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
@@ -89,6 +117,16 @@ const Profiles = () => {
         <p className="text-sm text-gray-500 dark:text-gray-400">
           {t('admin.profiles_subtitle', 'Review owner verification profiles and approve pending submissions.')}
         </p>
+      </div>
+
+      <div className="max-w-md">
+        <input
+          type="search"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder={t('admin.search_profiles_placeholder', 'Search profiles by full name')}
+          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/10 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100"
+        />
       </div>
 
       {errorMessage ? (
@@ -114,75 +152,76 @@ const Profiles = () => {
             <tbody className="divide-y divide-gray-200 dark:divide-white/5 text-gray-700 dark:text-gray-300">
               {isLoading ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <td colSpan="7" className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                     {t('admin.loading_profiles', 'Loading profiles...')}
                   </td>
                 </tr>
               ) : profiles.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <td colSpan="7" className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                     {t('admin.no_profiles', 'No profiles found.')}
                   </td>
                 </tr>
-              ) : profiles.map((profile) => (
-                <tr 
-                  key={profile.id} 
-                  className="transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
-                >
-                  <td className="whitespace-nowrap px-6 py-4">#{profile.id}</td>
-                  <td className="whitespace-nowrap px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-gray-900 dark:text-white">{profile.full_name}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">{t('admin.dob', 'DOB')}: {profile.date_of_birth || t('admin.not_available', 'N/A')}</span>
-                    </div>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="font-medium text-gray-900 dark:text-white">{profile.user?.email || t('admin.not_available', 'N/A')}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{profile.user?.phone || t('admin.not_available', 'N/A')}</span>
-                    </div>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4">{profile.city || t('admin.not_available', 'N/A')}</td>
-                  <td className="whitespace-nowrap px-6 py-4">{profile.national_number || t('admin.not_available', 'N/A')}</td>
-                  <td className="whitespace-nowrap px-6 py-4">
-                    <span 
-                      className={`rounded px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white ${
-                        profile.is_verified ? 'bg-emerald-500/90' : 'bg-amber-500/90'
-                      }`}
-                    >
-                      {profile.is_verified ? t('admin.verified', 'Verified') : t('admin.pending', 'Pending')}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      {profile.is_verified ? (
-                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                          {t('admin.no_action_needed', 'No Action Needed')}
-                        </span>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => setApprovalModalProfile(profile)}
-                            disabled={activeActionId === profile.id}
-                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-                          >
-                            <FaCheck className="h-3 w-3" />
-                            {t('admin.approve', 'Approve')}
-                          </button>
-                          <button
-                            onClick={() => handleProfileAction(profile.id, 'reject')}
-                            disabled={activeActionId === profile.id}
-                            className="inline-flex items-center gap-2 rounded-lg bg-red-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            <FaTimes className="h-3 w-3" />
-                            {t('admin.reject', 'Reject')}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              ) : profiles.map((profile) => {
+                const profileStatus = profile.status || (profile.is_verified ? 'approved' : 'pending');
+                const needsReview = profileStatus === 'pending';
+
+                return (
+                  <tr
+                    key={profile.id}
+                    className="transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
+                  >
+                    <td className="whitespace-nowrap px-6 py-4">#{profile.id}</td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-gray-900 dark:text-white">{profile.full_name}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">{t('admin.dob', 'DOB')}: {profile.date_of_birth || t('admin.not_available', 'N/A')}</span>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-900 dark:text-white">{profile.user?.email || t('admin.not_available', 'N/A')}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{profile.user?.phone || t('admin.not_available', 'N/A')}</span>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">{profile.city || t('admin.not_available', 'N/A')}</td>
+                    <td className="whitespace-nowrap px-6 py-4">{profile.national_number || t('admin.not_available', 'N/A')}</td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <span className={`rounded px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white ${getProfileStatusBadgeClass(profileStatus)}`}>
+                        {t(`admin.status_${profileStatus}`, profileStatus)}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-3">
+                        {needsReview ? (
+                          <>
+                            <button
+                              onClick={() => setApprovalModalProfile(profile)}
+                              disabled={activeActionId === profile.id}
+                              className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                            >
+                              <FaCheck className="h-3 w-3" />
+                              {t('admin.approve', 'Approve')}
+                            </button>
+                            <button
+                              onClick={() => handleProfileAction(profile.id, 'reject')}
+                              disabled={activeActionId === profile.id}
+                              className="inline-flex items-center gap-2 rounded-lg bg-red-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              <FaTimes className="h-3 w-3" />
+                              {t('admin.reject', 'Reject')}
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                            {t('admin.no_action_needed', 'No Action Needed')}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

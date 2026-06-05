@@ -19,16 +19,20 @@ class AdminProfileContoller extends Controller
     }
 
     // 2. البدء ببناء الاستعلام
-    $query = Profile::query();
+    $query = Profile::with('user');
 
     // 3. البحث حسب الاسم (إذا تم إرساله في الطلب)
-    if ($request->has('full_name')) {
-        $query->where('full_name', 'like', '%' . $request->full_name . '%');
+    if ($request->filled('full_name')) {
+        $query->where('full_name', 'like', '%' . trim((string) $request->input('full_name')) . '%');
     }
 
     // 4. الفلترة حسب حالة التوثيق (is_verified)
     if ($request->has('is_verified')) {
         $query->where('is_verified', $request->boolean('is_verified'));
+    }
+
+    if ($request->filled('status')) {
+        $query->where('status', trim((string) $request->input('status')));
     }
 
     // 5. البحث حسب المدينة
@@ -43,7 +47,7 @@ class AdminProfileContoller extends Controller
     }
 
     // 6. جلب النتائج مع الترقيم (Pagination) لضمان سرعة الأداء
-    $profiles = $query->with('user')->latest()->paginate(15);
+    $profiles = $query->latest()->paginate(15);
 
     return response()->json([
         'message' => 'Profiles retrieved successfully',
@@ -56,7 +60,7 @@ class AdminProfileContoller extends Controller
      */
 public function pending()
 {
-    $profiles = Profile::where('is_verified', false)
+    $profiles = Profile::where('status', 'pending')
         ->with(['user:id,name,email,phone'])           // جلب بيانات اليوزر المرتبطة
         ->orderBy('created_at', 'desc')
         ->paginate(15);
@@ -83,6 +87,13 @@ public function pending()
     public function approve($id)
     {
         $profile = Profile::find($id);
+        if (!$profile) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profile not found.'
+            ], 404);
+        }
+
      if ($profile->is_verified) {
         return response()->json([
                 'success' => false,
@@ -92,6 +103,7 @@ public function pending()
 
     $profile->update([
         'is_verified' => true,
+        'status' => 'approved',
     ]);
     if ($profile->user) {
         $profile->user->notify(new \App\Notifications\ProfileApproveNotification());
@@ -102,7 +114,7 @@ public function pending()
             'content' => 'Your profile has been verified successfully. You can now use all the platform features.'
         ]);
     }
-    $updatedProfile = $profile->fresh();
+    $updatedProfile = $profile->fresh('user');
         return response()->json([
             'success' => true,
             'message' => 'Profile approved successfully.',
@@ -128,6 +140,7 @@ public function reject(Request $request, $id)
 
     $profile->update([
         'is_verified' => false,
+        'status' => 'rejected',
     ]);
     // إرسال إشعار الرفض مع السبب
     if ($profile->user) {
@@ -137,7 +150,8 @@ public function reject(Request $request, $id)
     return response()->json([
         'success' => true,
         'message' => 'Profile has been rejected and the user has been notified.',
-        'reason' => $reason
+        'reason' => $reason,
+        'profile' => $profile->fresh('user')
     ]);
 }
 }

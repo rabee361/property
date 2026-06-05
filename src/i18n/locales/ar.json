@@ -185,6 +185,8 @@
     "properties_load_failed": "فشل تحميل العقارات.",
     "profile_action_failed": "فشل تحديث حالة الملف الشخصي.",
     "property_action_failed": "فشل تحديث حالة العقار.",
+    "search_profiles_placeholder": "ابحث في الملفات الشخصية بالاسم الكامل",
+    "search_properties_placeholder": "ابحث في العقارات بالعنوان",
     "status_pending": "معلق",
     "status_approved": "مقبول",
     "status_rejected": "مرفوض",

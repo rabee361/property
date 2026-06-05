@@ -13,15 +13,21 @@ use Illuminate\Support\Facades\Storage;
 class AdminPropertyController extends Controller
 {
 
-public function index()
+public function index(Request $request)
 {
-    $properties = Property::with([
+    $query = Property::with([
         'user:id,name,email,phone',
         'admin:id,name,email',
         'images',
-    ])
-    ->latest()
-    ->get();
+    ]);
+
+    if ($request->filled('title')) {
+        $query->where('title', 'like', '%' . trim((string) $request->input('title')) . '%');
+    }
+
+    $properties = $query
+        ->latest()
+        ->get();
 
     return response()->json([
         'success' => true,

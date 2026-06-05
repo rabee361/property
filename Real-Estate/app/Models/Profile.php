@@ -18,7 +18,12 @@ class Profile extends Model
         'id_card_photo' ,
         'date_of_birth' ,
         'city' ,
-        'is_verified'
+        'is_verified',
+        'status'
+    ];
+
+    protected $casts = [
+        'is_verified' => 'boolean',
     ];
 
     public function user()

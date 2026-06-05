@@ -14,6 +14,18 @@ const Properties = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [activePropertyId, setActivePropertyId] = useState(null);
   const [approvalModalProperty, setApprovalModalProperty] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm.trim());
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [searchTerm]);
 
   useEffect(() => {
     let isMounted = true;
@@ -23,7 +35,13 @@ const Properties = () => {
       setErrorMessage('');
 
       try {
-        const response = await apiRequest('/api/admin/property/admin/index', {
+        const params = new URLSearchParams();
+
+        if (debouncedSearchTerm) {
+          params.set('title', debouncedSearchTerm);
+        }
+
+        const response = await apiRequest(`/api/admin/property/admin/index${params.toString() ? `?${params.toString()}` : ''}`, {
           token,
         });
 
@@ -48,7 +66,7 @@ const Properties = () => {
     return () => {
       isMounted = false;
     };
-  }, [t, token]);
+  }, [debouncedSearchTerm, t, token]);
 
   const handleStatusChange = async (propertyId, status) => {
     setActivePropertyId(propertyId);
@@ -99,6 +117,16 @@ const Properties = () => {
         </p>
       </div>
 
+      <div className="max-w-md">
+        <input
+          type="search"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder={t('admin.search_properties_placeholder', 'Search properties by title')}
+          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/10 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100"
+        />
+      </div>
+
       {errorMessage ? (
         <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
           {errorMessage}
@@ -124,13 +152,13 @@ const Properties = () => {
             <tbody className="divide-y divide-gray-200 dark:divide-white/5 text-gray-700 dark:text-gray-300">
               {isLoading ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <td colSpan="9" className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                     {t('admin.loading_properties', 'Loading properties...')}
                   </td>
                 </tr>
               ) : properties.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <td colSpan="9" className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                     {t('admin.no_properties', 'No properties found.')}
                   </td>
                 </tr>

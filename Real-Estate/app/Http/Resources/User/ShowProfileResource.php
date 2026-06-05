@@ -22,6 +22,7 @@ class ShowProfileResource extends JsonResource
             'id_card_photo'   => $this->id_card_photo,
             'city'            => $this->city,
             'is_verified'     => $this->is_verified,
+            'status'          => $this->status,
         ];
     }
 }
