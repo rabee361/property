@@ -67,6 +67,12 @@ public function changeStatus(Request $request, $id)
         }
         elseif ($newStatus === 'rejected') {
             $property->user->notify(new \App\Notifications\PropertyRejectedNotification());
+            
+            UserNotification::create([
+                'user_id' => $property->user_id,
+                'title'   => 'Property Rejected',
+                'content' => "Your property listing '{$property->title}' has been rejected."
+            ]);
         }
                 elseif ($newStatus === 'sold') {
             $property->user->notify(new \App\Notifications\PropertySoldNotification());
@@ -82,4 +88,22 @@ public function changeStatus(Request $request, $id)
     ]);
 }
 
+    public function destroy($id)
+    {
+        $property = Property::find($id);
+
+        if (!$property) {
+            return response()->json(['success' => false, 'message' => 'العقار غير موجود'], 404);
+        }
+
+        // Optional: delete associated images or files if necessary
+        // ...
+
+        $property->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف العقار بنجاح'
+        ]);
+    }
 }

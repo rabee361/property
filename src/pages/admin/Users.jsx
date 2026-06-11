@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
-import { FaCheck, FaTimes } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaTrash } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 
@@ -70,14 +70,15 @@ const Profiles = () => {
     };
   }, [debouncedSearchTerm, t, token]);
 
-  const handleProfileAction = async (profileId, action) => {
+  const handleStatusChange = async (profileId, status) => {
     setActiveActionId(profileId);
     setErrorMessage('');
 
     try {
-      const response = await apiRequest(`/api/admin/profiles/${action}/${profileId}`, {
-        method: action === 'approve' ? 'POST' : 'DELETE',
+      const response = await apiRequest(`/api/admin/profiles/changeStatus/${profileId}`, {
+        method: 'POST',
         token,
+        data: { status }
       });
 
       setProfiles((currentProfiles) =>
@@ -86,8 +87,8 @@ const Profiles = () => {
             ? {
                 ...profile,
                 ...(response?.profile || {}),
-                status: action === 'approve' ? 'approved' : 'rejected',
-                is_verified: action === 'approve',
+                status: status,
+                is_verified: status === 'approved',
               }
             : profile,
         ),
@@ -99,6 +100,41 @@ const Profiles = () => {
       toast.error(msg);
     } finally {
       setActiveActionId(null);
+    }
+  };
+
+  const handleDelete = async (profileId) => {
+    if (!window.confirm(t('admin.confirm_delete_profile', 'Are you sure you want to delete this profile? This action cannot be undone.'))) {
+      return;
+    }
+
+    setActiveActionId(profileId);
+    setErrorMessage('');
+
+    try {
+      await apiRequest(`/api/admin/profiles/delete/${profileId}`, {
+        method: 'DELETE',
+        token,
+      });
+
+      setProfiles((currentProfiles) => currentProfiles.filter(p => p.id !== profileId));
+      toast.success(t('admin.profile_deleted', 'Profile deleted successfully!'));
+    } catch (error) {
+      const msg = error.message || t('admin.profile_delete_failed', 'Failed to delete profile.');
+      setErrorMessage(msg);
+      toast.error(msg);
+    } finally {
+      setActiveActionId(null);
+    }
+  };
+
+  const handleStatusSelect = (profile, newStatus) => {
+    if (newStatus === (profile.status || (profile.is_verified ? 'approved' : 'pending'))) return;
+    
+    if (newStatus === 'approved') {
+      setApprovalModalProfile(profile);
+    } else {
+      handleStatusChange(profile.id, newStatus);
     }
   };
 
@@ -187,36 +223,28 @@ const Profiles = () => {
                     <td className="whitespace-nowrap px-6 py-4">{profile.city || t('admin.not_available', 'N/A')}</td>
                     <td className="whitespace-nowrap px-6 py-4">{profile.national_number || t('admin.not_available', 'N/A')}</td>
                     <td className="whitespace-nowrap px-6 py-4">
-                      <span className={`rounded px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white ${getProfileStatusBadgeClass(profileStatus)}`}>
-                        {t(`admin.status_${profileStatus}`, profileStatus)}
-                      </span>
+                      <select
+                        value={profileStatus}
+                        onChange={(e) => handleStatusSelect(profile, e.target.value)}
+                        disabled={activeActionId === profile.id}
+                        className={`rounded px-2 py-1 text-xs font-semibold uppercase tracking-widest text-white outline-none cursor-pointer disabled:opacity-50 ${getProfileStatusBadgeClass(profileStatus)} appearance-none text-center`}
+                        style={{ textAlignLast: 'center' }}
+                      >
+                        <option value="pending" className="bg-white text-gray-900">{t('admin.status_pending', 'Pending')}</option>
+                        <option value="approved" className="bg-white text-gray-900">{t('admin.status_approved', 'Approved')}</option>
+                        <option value="rejected" className="bg-white text-gray-900">{t('admin.status_rejected', 'Rejected')}</option>
+                      </select>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-3">
-                        {needsReview ? (
-                          <>
-                            <button
-                              onClick={() => setApprovalModalProfile(profile)}
-                              disabled={activeActionId === profile.id}
-                              className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-                            >
-                              <FaCheck className="h-3 w-3" />
-                              {t('admin.approve', 'Approve')}
-                            </button>
-                            <button
-                              onClick={() => handleProfileAction(profile.id, 'reject')}
-                              disabled={activeActionId === profile.id}
-                              className="inline-flex items-center gap-2 rounded-lg bg-red-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              <FaTimes className="h-3 w-3" />
-                              {t('admin.reject', 'Reject')}
-                            </button>
-                          </>
-                        ) : (
-                          <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                            {t('admin.no_action_needed', 'No Action Needed')}
-                          </span>
-                        )}
+                        <button
+                          onClick={() => handleDelete(profile.id)}
+                          disabled={activeActionId === profile.id}
+                          className="inline-flex items-center justify-center rounded-lg bg-rose-500/10 p-2 text-rose-500 transition hover:bg-rose-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-rose-500/20 dark:hover:bg-rose-500"
+                          title={t('admin.delete', 'Delete')}
+                        >
+                          <FaTrash className="h-4 w-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -284,7 +312,7 @@ const Profiles = () => {
                 </button>
                 <button
                   onClick={() => {
-                    handleProfileAction(approvalModalProfile.id, 'approve');
+                    handleStatusChange(approvalModalProfile.id, 'approved');
                     setApprovalModalProfile(null);
                   }}
                   disabled={activeActionId === approvalModalProfile.id}

@@ -145,6 +145,12 @@ public function reject(Request $request, $id)
     // إرسال إشعار الرفض مع السبب
     if ($profile->user) {
         $profile->user->notify(new \App\Notifications\ProfileRejectedNotification());
+        
+        UserNotification::create([
+            'user_id' => $profile->user_id,
+            'title'   => 'Profile Rejected',
+            'content' => 'Your profile has been rejected. ' . $reason
+        ]);
     }
 
     return response()->json([
@@ -154,4 +160,59 @@ public function reject(Request $request, $id)
         'profile' => $profile->fresh('user')
     ]);
 }
+
+    public function changeStatus(Request $request, $id)
+    {
+        $profile = Profile::find($id);
+
+        if (!$profile) {
+            return response()->json(['success' => false, 'message' => 'Profile not found.'], 404);
+        }
+
+        $request->validate([
+            'status' => 'required|in:approved,rejected,pending'
+        ]);
+
+        $newStatus = $request->status;
+
+        if ($newStatus === 'approved') {
+            if ($profile->is_verified && $profile->status === 'approved') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Profile status updated successfully.',
+                    'profile' => clone $profile->fresh('user')
+                ]);
+            }
+            return $this->approve($id);
+        } elseif ($newStatus === 'rejected') {
+            return $this->reject($request, $id);
+        } else {
+            $profile->update([
+                'is_verified' => false,
+                'status' => 'pending',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile status updated to pending.',
+                'profile' => $profile->fresh('user')
+            ]);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $profile = Profile::find($id);
+
+        if (!$profile) {
+            return response()->json(['success' => false, 'message' => 'الملف غير موجود'], 404);
+        }
+
+        $profile->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف الملف بنجاح'
+        ]);
+    }
 }

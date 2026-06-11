@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
-import { FaCheck, FaTimes } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaTrash } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { formatPropertyPrice } from '../../lib/property';
@@ -85,6 +85,7 @@ const Properties = () => {
             ? {
                 ...property,
                 ...(response?.property || {}),
+                status: status, // ensure frontend updates immediately based on requested status
               }
             : property,
         ),
@@ -96,6 +97,41 @@ const Properties = () => {
       toast.error(msg);
     } finally {
       setActivePropertyId(null);
+    }
+  };
+
+  const handleDelete = async (propertyId) => {
+    if (!window.confirm(t('admin.confirm_delete_property', 'Are you sure you want to delete this property? This action cannot be undone.'))) {
+      return;
+    }
+
+    setActivePropertyId(propertyId);
+    setErrorMessage('');
+
+    try {
+      await apiRequest(`/api/admin/property/admin/delete/${propertyId}`, {
+        method: 'DELETE',
+        token,
+      });
+
+      setProperties((currentProperties) => currentProperties.filter(p => p.id !== propertyId));
+      toast.success(t('admin.property_deleted', 'Property deleted successfully!'));
+    } catch (error) {
+      const msg = error.message || t('admin.property_delete_failed', 'Failed to delete property.');
+      setErrorMessage(msg);
+      toast.error(msg);
+    } finally {
+      setActivePropertyId(null);
+    }
+  };
+
+  const handleStatusSelect = (property, newStatus) => {
+    if (newStatus === property.status) return;
+    
+    if (newStatus === 'approved') {
+      setApprovalModalProperty(property);
+    } else {
+      handleStatusChange(property.id, newStatus);
     }
   };
 
@@ -186,11 +222,19 @@ const Properties = () => {
                     {formatPropertyPrice(property.price)}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <span 
-                      className={`rounded px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white ${getStatusBadgeClass(property.status)}`}
+                    <select
+                      value={property.status}
+                      onChange={(e) => handleStatusSelect(property, e.target.value)}
+                      disabled={activePropertyId === property.id}
+                      className={`rounded px-2 py-1 text-xs font-semibold uppercase tracking-widest text-white outline-none cursor-pointer disabled:opacity-50 ${getStatusBadgeClass(property.status)} appearance-none text-center`}
+                      style={{ textAlignLast: 'center' }}
                     >
-                      {t(`admin.status_${property.status}`, property.status)}
-                    </span>
+                      <option value="pending" className="bg-white text-gray-900">{t('admin.status_pending', 'Pending')}</option>
+                      <option value="approved" className="bg-white text-gray-900">{t('admin.status_approved', 'Approved')}</option>
+                      <option value="rejected" className="bg-white text-gray-900">{t('admin.status_rejected', 'Rejected')}</option>
+                      <option value="sold" className="bg-white text-gray-900">{t('admin.status_sold', 'Sold')}</option>
+                      <option value="rented" className="bg-white text-gray-900">{t('admin.status_rented', 'Rented')}</option>
+                    </select>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-widest ${property.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300' : 'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-300'}`}>
@@ -199,30 +243,14 @@ const Properties = () => {
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-3">
-                      {property.status === 'pending' ? (
-                        <>
-                          <button
-                            onClick={() => setApprovalModalProperty(property)}
-                            disabled={activePropertyId === property.id}
-                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            <FaCheck className="h-3 w-3" />
-                            {t('admin.approve', 'Approve')}
-                          </button>
-                          <button
-                            onClick={() => handleStatusChange(property.id, 'rejected')}
-                            disabled={activePropertyId === property.id}
-                            className="inline-flex items-center gap-2 rounded-lg bg-red-500 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            <FaTimes className="h-3 w-3" />
-                            {t('admin.reject', 'Reject')}
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                          {t('admin.no_action_needed', 'No Action Needed')}
-                        </span>
-                      )}
+                      <button
+                        onClick={() => handleDelete(property.id)}
+                        disabled={activePropertyId === property.id}
+                        className="inline-flex items-center justify-center rounded-lg bg-rose-500/10 p-2 text-rose-500 transition hover:bg-rose-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-rose-500/20 dark:hover:bg-rose-500"
+                        title={t('admin.delete', 'Delete')}
+                      >
+                        <FaTrash className="h-4 w-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>

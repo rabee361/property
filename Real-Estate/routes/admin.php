@@ -30,6 +30,8 @@ Route::prefix('stats')
         Route::get('/pending', 'pending');            // عرض المعلقة فقط
         Route::post('/approve/{id}', 'approve'); // الموافقة
         Route::delete('/reject/{id}', 'reject'); // الرفض
+        Route::post('/changeStatus/{id}', 'changeStatus');
+        Route::delete('/delete/{id}', 'destroy');
     });
 
 
@@ -39,6 +41,7 @@ Route::prefix('stats')
     ->group(function () {
         Route::get('/index', 'index');
         Route::post('/changeStatus/{id}', 'changeStatus')->name('changeStatus');
+        Route::delete('/delete/{id}', 'destroy');
     });
 
 
